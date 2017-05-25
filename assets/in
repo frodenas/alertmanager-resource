@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -e
+
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+
+destination_dir=$1
+
+if [ -z "${destination_dir}" ]; then
+  echo "usage: $0 <path/to/destination>" >&2
+  exit 1
+fi
+
+mkdir -p "${destination_dir}"
+
+source $(dirname $0)/common.sh
+
+silence_id=$(jq -r '.version.ref // ""' < ${payload})
+
+echo "${silence_id}" > "${destination_dir}/silence"
+
+amtool --alertmanager.url ${url} \
+       --output json \
+       silence query --expired | \
+       jq -e ".[] | select(.id == \"${silence_id}\") | {
+         version: { ref: .id },
+         metadata: [
+           { name: \"created_by\", value: .createdBy },
+           { name: \"comment\", value: .comment },
+           { name: \"starts_at\", value: .startsAt },
+           { name: \"ends_at\", value: .endsAt },
+           { name: \"updated_at\", value: .updatedAt }
+         ]
+        }" >&3
+
+exit 0

@@ -1,0 +1,31 @@
+---
+groups:
+  - name: alertmanager-resource
+    jobs:
+      - build-docker-image
+
+jobs:
+  - name: build-docker-image
+    serial: true
+    plan:
+      - get: docker-image-src
+        trigger: true
+
+      - put: docker-image
+        params:
+          build: docker-image-src
+
+resources:
+  - name: docker-image-src
+    type: git
+    source:
+      uri: https://github.com/frodenas/alertmanager-resource.git
+      branch: master
+
+  - name: docker-image
+    type: docker-image
+    source:
+      email: {{docker-hub-email}}
+      username: {{docker-hub-username}}
+      password: {{docker-hub-password}}
+      repository: frodenas/alertmanager-resource
