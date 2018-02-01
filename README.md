@@ -1,4 +1,4 @@
-# Alertmanager Resource
+# Alertmanager Resource [![Build Status](https://travis-ci.org/frodenas/alertmanager-resource.png)](https://travis-ci.org/frodenas/alertmanager-resource)
 
 A [Concourse](http://concourse.ci/) resource to interact with [Prometheus Alertmanager](https://prometheus.io/docs/alerting/alertmanager/), allowing you to `silence` certain alerts and to `expire` silences.
 
