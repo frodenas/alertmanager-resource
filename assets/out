@@ -23,10 +23,11 @@ if [[ "${operation}" == "silence" ]]; then
 	fi
 
 	silence_id=$(amtool --alertmanager.url ${url} \
-	                    --author "${creator}" \
-	                    --comment "${comments}" \
-	                    --expires "${expires}" \
-	                    silence add ${matchers})
+                      silence add \
+                      --author "${creator}" \
+                      --comment "${comments}" \
+                      --expires "${expires}" \
+                      ${matchers})
 
 	amtool --alertmanager.url ${url} \
 	       --output json \
