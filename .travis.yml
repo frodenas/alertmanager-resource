@@ -8,11 +8,19 @@ jobs:
     - stage: Build docker image
       env:
         - DOCKER_IMAGE_NAME=frodenas/alertmanager-resource
-        - DOCKER_IMAGE_TAG=latest
         - secure: EMasURUYAXvbMQnFZHGX/YJQt5YzBi5kv7eFTSIAI8c1EgLi4C6RmlglJkbHvsb+YV44EYU9QKQdM1WRTrj3j+v/1TNKFtYAFQuDOFV2vR3EUkX43fqIabLwtVJLmW/5gffQdeK1OQLRdhb5hrM5BBoPFdhEizisRu1n7pJ8NNPpTMxsN+3Z6u5s0+9twMEkY3tfR1LOx/tMPTAasmThCPB9/E5LGLSqXtYOjFapK3SKDV3f3dGvYPID6vl2GpwFSwgAawNfgPLxPb5rsbsCQ6l7J9m/qvBSU9imoPTP5QJcQW7u4jUuavDNtP40f9mVBjyTxoH4JjYuiV3hmy6dZJkzamLQhtBRyYorOkcyDR+WJ7lActAR9TVAKU1t2cdxZY0SMR2ezyBFEMwFYqvcqf4jJX4FdNGrOxzl5GIhFtr8n3fidTm4NNYiozLGpX3VG+nipMHj802A6X4G1HRLn3Oycez8Xw4E/DqPGqpccG7iQlM5k8WYyHtQDtMiLV0YdLN3h/ieqglaoYz3n1v6HJWal2/ws9XzIq85pnkAIN4Z4I03rs4uf5FIh93loYCiWfsHvpe2iWqS3qecFHNICKVKPDEa9P6XhWkV+UaZLDLw4jHilRhq2HtVzzwwg7AThpp59pSPJkuogZPa0hjoMVOHn81qjAZETWeRto9Xp50=
         - secure: A53c9FRE6Uiwx99QkExUGFrEOehotoW7u230WJfnM9W8+s29EwC88RcvTR2UbdtSDI87K08aJbYmfo2/nTQ1SSF/kYos2Xhkbe8OwgvsxKce3+feFCKXcN+Mf1zI7TljCmOZNGqF84BesWegGO/EozPbG7r4gPCUrLveJn5vWwoulUP4+70QMQwGAbC0XSqd3r8pvTyqLw0lfhibjF0JsmVuaQD5Req7ZhX03/5oEuOrpCizVo7NUHirmkNso4IoXgC623SzAYE98ZbIpchSRbVISW5EydJnjq3yL6WYQL7GOsBxt0OFFXVqm6MYBvssDBk9YolJGorWPcZZnR9AYyschXm0g4En9IMLwmL4TKrTgj8IPya/7hpRcWgxA3GY6seGlbU+6N+UPgkGYOGoTv4LsZUceeO/0B9tvMIGj/KJEgqvzxr3uHGqSGkvGyYoK0dtGhGKY4kcUm6qBqHViw82HzDs0Z3cgqaax6UVLzS0go9+sMzxkLOi6sh9tdJpdqTbiO5pBcNOs/ilB3W0lHu/hPc55tfh+TFmd0e9pUDLcOy/+/qDC7iL0WnJ1jNFJPc+U+YQaAMnunbyL2ytuugmbUuJL66INT73OHl+RilfNLegy64KZWcJcfrHpDArYpiSvieYpOHIu2uqCU9ZUq58WCDdfZoWIxyz9nRnZR0=
       script:
-        - docker build -t "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}" .
+        - |
+          if [ -n "$TRAVIS_TAG" ]; then
+            docker build -t "${DOCKER_IMAGE_NAME}:${TRAVIS_TAG}" .
+          else
+            docker build -t "${DOCKER_IMAGE_NAME}:$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)" .
+          fi
+        - |
+          if [[ "$TRAVIS_TAG" =~ ^v[0-9]+(\.[0-9]+){2}$ ]]; then
+            docker tag "$DOCKER_IMAGE_NAME:$TRAVIS_TAG" "$DOCKER_IMAGE_NAME:latest"
+          fi
         - docker images
         - |
           if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
