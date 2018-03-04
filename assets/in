@@ -20,18 +20,26 @@ silence_id=$(jq -r '.version.ref // ""' < ${payload})
 
 echo "${silence_id}" > "${destination_dir}/silence"
 
-amtool --alertmanager.url ${url} \
-       --output json \
-       silence query --expired | \
-       jq -e ".[] | select(.id == \"${silence_id}\") | {
-         version: { ref: .id },
-         metadata: [
-           { name: \"created_by\", value: .createdBy },
-           { name: \"comment\", value: .comment },
-           { name: \"starts_at\", value: .startsAt },
-           { name: \"ends_at\", value: .endsAt },
-           { name: \"updated_at\", value: .updatedAt }
-         ]
-        }" >&3
+am_active=$(amtool --alertmanager.url ${url} \
+                   --output json \
+                   silence query)
+
+am_expired=$(amtool --alertmanager.url ${url} \
+                   --output json \
+                   silence query --expired)
+
+am_all=$(echo "${am_active}" "${am_expired}" | jq -s add)
+
+echo "${am_all}" | \
+     jq -e ".[] | select(.id == \"${silence_id}\") | {
+       version: { ref: .id },
+       metadata: [
+         { name: \"created_by\", value: .createdBy },
+         { name: \"comment\", value: .comment },
+         { name: \"starts_at\", value: .startsAt },
+         { name: \"ends_at\", value: .endsAt },
+         { name: \"updated_at\", value: .updatedAt }
+       ]
+      }" >&3
 
 exit 0
