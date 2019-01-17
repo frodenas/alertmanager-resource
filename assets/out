@@ -26,7 +26,7 @@ if [[ "${operation}" == "silence" ]]; then
                       silence add \
                       --author "${creator}" \
                       --comment "${comments}" \
-                      --expires "${expires}" \
+                      --duration="${expires}" \
                       ${matchers})
 
 	amtool --alertmanager.url ${url} \
