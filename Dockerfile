@@ -2,7 +2,7 @@ FROM concourse/buildroot:git
 
 RUN cat /etc/ssl/certs/*.pem > /etc/ssl/certs/ca-certificates.crt
 
-ENV jq_version=1.5
+ENV jq_version=1.6
 ADD https://github.com/stedolan/jq/releases/download/jq-${jq_version}/jq-linux64 /usr/local/bin/jq
 RUN chmod +x /usr/local/bin/jq
 
